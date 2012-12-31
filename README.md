@@ -1,4 +1,4 @@
-base64-fold
+Base64 Fold
 ===========
 
 Base64-encoded Data URIs are notoriously long and look ugly in text editors:
