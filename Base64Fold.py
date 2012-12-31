@@ -9,7 +9,7 @@ class FoldBase64Command(sublime_plugin.TextCommand):
 
 class Base64Fold(sublime_plugin.EventListener):
   def on_load(self, view):
-    style_files_exts = ['.css', '.less', '.scss']
+    style_files_exts = ['.css', '.less', '.sass', '.scss']
     file_name = view.file_name()
     if file_name:
       match = re.search('\.[0-9a-z]+$', file_name, re.IGNORECASE)
