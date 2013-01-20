@@ -12,8 +12,13 @@ This little plug-in makes use of Sublime Text folding to hide them:
 
 Problem solved: the URI is still there, but it's neatly folded and can be unfolded for inspection.
 
+Installation
+------------
+
+You can install Base64 Fold through [Sublime Package Control](http://wbond.net/sublime_packages/package_control).
+
 Don't forget about these default Sublime key shortcuts:
 
-Fold:   ```ctrl+shift+]``` 
+Fold:   ```ctrl+shift+]```
 
 Unfold: ```ctrl+shift+[```
