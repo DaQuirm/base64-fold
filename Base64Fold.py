@@ -3,7 +3,7 @@ import sublime, sublime_plugin
 
 class FoldBase64Command(sublime_plugin.TextCommand):
   def run(self, edit):
-    regions = self.view.find_all('(?<=base64\,)[\w\d\+\/=]+(?=\);?)')
+    regions = self.view.find_all('(?<=base64\,)[\w\d\+\/=]+(?=[\'\"]?\);?)')
     if regions:
       self.view.fold(regions)
 
