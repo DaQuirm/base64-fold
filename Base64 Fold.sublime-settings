@@ -1,0 +1,19 @@
+{
+	// This settings file will be rewrote on package updates. User settings
+	// should be placed in Packages/User/Preferences.sublime-settings, which
+	// can be openned from menu "Preferences > Settings - User"
+
+	// Fold Base64 code in any file when this is set to true
+	"base64fold_any_file": false,
+
+	// When "base64fold_any_file" is set to false, or is omitted, fold Base64
+	// code in files that match one of the file extensions listed here.
+	// If this list is set to empty (like this: []) while "base64fold_any_file"
+	// not being true, no Base64 code will be folded.
+	// Note: File extension should NOT begin with "." i.e. "css" not ".css"
+	"base64fold_file_extensions":
+	[
+		"css","less","sass","scss",
+		"htm","html"
+	]
+}
