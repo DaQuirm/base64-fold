@@ -22,3 +22,10 @@ Don't forget about these default Sublime key shortcuts:
 Fold:   ```ctrl+shift+]```
 
 Unfold: ```ctrl+shift+[```
+
+Settings
+--------
+
+By defaults, only Base64 code in CSS and HTML files (recognized by file extensions) will be folded. You can set it to fold in any file, or limit to specific file extensions, by adding your settings to user preferences file, which can be openned from menu `Preferences > Settings - User`.
+
+For details, see `Packages/Base64 Fold/Base64 Fold.sublime-settings`, or the latest version [here](Base64 Fold.sublime-settings).
