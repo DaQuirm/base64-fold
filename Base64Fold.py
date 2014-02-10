@@ -13,6 +13,11 @@ class FoldBase64Command(sublime_plugin.TextCommand):
       self.view.fold([r for r in regions if r.size() % 4 == 0])
 
 class Base64Fold(sublime_plugin.EventListener):
+  def init_(self):
+    self.on_load(sublime.active_window().active_view())
+    for window in sublime.windows():
+      self.on_load(window.active_view())
+
   def on_load(self, view):
     prepare_fold(view)
 
@@ -45,3 +50,6 @@ def prepare_fold(view):
         extension = match.group(0)
         if extension in fold_file_extensions:
           view.run_command('fold_base64')
+
+def plugin_loaded():
+  Base64Fold().init_()
