@@ -16,6 +16,7 @@
 		"css","less","sass","scss",
 		"htm","html"
 	],
-
+	
+	// Fold all data URIs (e.g. UTF8-encoded SVG embeds)
 	"base64fold_all_uris": true
 }
