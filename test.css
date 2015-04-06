@@ -1,0 +1,14 @@
+/* normal base64 */
+li {
+	list-style-image: url('data:image/png;base64,Y2VsbGFyIGRvb3I=');
+}
+
+/* base64 incorrect size */
+li {
+	list-style-image: url('data:image/png;base64,Y2VsbGFyIGRvb3I');
+}
+
+/* svg in utf8 */
+li {
+	list-style-image: url('data:image/svg+xml;utf8,<svg width="11px" height="11px" xmlns="http://www.w3.org/2000/svg"><path d="M6.56713392,6.3167819 ... Z" fill="red" stroke="black" stroke-width="1"></path></svg>');
+}
