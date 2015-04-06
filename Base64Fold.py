@@ -2,54 +2,99 @@ import re
 import sublime, sublime_plugin
 
 class FoldBase64Command(sublime_plugin.TextCommand):
-  def run(self, edit):
-    # Base64 decodes each 4 encoded characters into 3 octects. The padding '='
-    # character might appear 1 or 2 times only at the end of the Base64 code,
-    # and only if there are less than 3 octects to be decoded. We don't need to
-    # match what (["');], etc) is behind the code, as we are not folding them.
-    regions = self.view.find_all('(?<=base64\,)[\w\d\+\/]{2,}={0,2}')
-    if regions:
+  def run(self, edit, fold_all_uris):
+
+    # regular expression to search with
+    regexp = None
+    match_index = 0
+    region_filter = None
+
+    if fold_all_uris:
+      # fold all URIs if the option is enabled
+      regexp = '\(([\'"])?[^,]+,(.+?)(?=\1?\))'
+      match_index = 2 # second group
+      region_filter = lambda region: region
+    else:
+      # fold just the base64 URIs otherwise
+
+      # Base64 decodes each 4 encoded characters into 3 octects. The padding '='
+      # character might appear 1 or 2 times only at the end of the Base64 code,
+      # and only if there are fewer than 3 octects to be decoded. We don't need to
+      # match what (["');], etc) is after the code, as they are not being folded.
+      regexp = '(?<=base64\,)[\w\d\+\/]{2,}={0,2}'
       # Only fold Base64 code that has a valid length
-      self.view.fold([r for r in regions if r.size() % 4 == 0])
+      region_filter = lambda region: region.size() % 4 == 0
+
+    view_text = self.view.substr(sublime.Region(0, self.view.size()))
+
+    pattern = re.compile(regexp)
+    for match in pattern.finditer(view_text):
+      start = match.start(match_index)
+      end = start + len(match.group(match_index))
+      region = sublime.Region(start, end)
+      if region_filter(region):
+        self.view.fold(region)
 
 class Base64Fold(sublime_plugin.EventListener):
   def init_(self):
-    self.on_load(sublime.active_window().active_view())
+    active_view = sublime.active_window().active_view()
+    self.on_load(active_view)
     for window in sublime.windows():
       self.on_load(window.active_view())
 
+  def load_settings(self, view):
+    fold_any_file = False
+    fold_file_extensions = []
+    fold_all_uris = False
+    scope_package = 'package'
+    scope_sublime = 'sublime'
+    settings = {
+      scope_package: sublime.load_settings('Base64 Fold.sublime-settings'),
+      scope_sublime: view.settings()
+    }
+    # Settings override order:
+    #   User/Preferences > User/Base64 Fold > Base64 Fold/Base64 Fold
+    for scope in [scope_package, scope_sublime]:
+      if settings[scope]:
+        fold_any_file = settings[scope].get('base64fold_any_file', fold_any_file)
+        fold_file_extensions = settings[scope].get(
+          'base64fold_file_extensions',
+          fold_file_extensions
+        )
+        fold_all_uris = settings[scope].get('base64fold_all_uris', fold_all_uris)
+
+    return {
+      'fold_any_file': fold_any_file,
+      'fold_file_extensions': fold_file_extensions,
+      'fold_all_uris': fold_all_uris
+    }
+
   def on_load(self, view):
-    prepare_fold(view)
+    active_view = sublime.active_window().active_view()
+    self.settings = self.load_settings(active_view)
+    self.fold(view)
 
   def on_pre_save(self, view):
-    prepare_fold(view)
+    active_view = sublime.active_window().active_view()
+    self.settings = self.load_settings(active_view)
+    self.fold(view)
 
-def prepare_fold(view):
-  fold_any_file = False
-  fold_file_extensions = []
-  scope_package = "package"
-  scope_sublime = "sublime"
-  settings = {
-    scope_package: sublime.load_settings("Base64 Fold.sublime-settings"),
-    scope_sublime: view.settings()
-  }
-  # Settings override order:
-  #   User/Preferences > User/Base64 Fold > Base64 Fold/Base64 Fold
-  for scope in [scope_package, scope_sublime]:
-    if settings[scope]:
-      fold_any_file = settings[scope].get("base64fold_any_file", fold_any_file)
-      fold_file_extensions = settings[scope].get("base64fold_file_extensions",
-        fold_file_extensions)
-  if fold_any_file:
-    view.run_command('fold_base64')
-  elif len(fold_file_extensions) > 0:
-    file_name = view.file_name()
-    if file_name:
-      match = re.search('(?<=\.)[0-9a-z]+$', file_name, re.IGNORECASE)
-      if match:
-        extension = match.group(0)
-        if extension in fold_file_extensions:
-          view.run_command('fold_base64')
+  def fold(self, view):
+    gotta_fold = False
+    # to fold or not to fold
+    if self.settings.get('fold_any_file'):
+      gotta_fold = True
+    elif len(self.settings.get('fold_file_extensions')) > 0:
+      file_name = view.file_name()
+      if file_name:
+        match = re.search('(?<=\.)[0-9a-z]+$', file_name, re.IGNORECASE)
+        if match:
+          extension = match.group(0)
+          if extension in self.settings.get('fold_file_extensions'):
+            gotta_fold = True
+
+    if gotta_fold:
+      view.run_command('fold_base64', { 'fold_all_uris': self.settings.get('fold_all_uris') })
 
 def plugin_loaded():
   Base64Fold().init_()

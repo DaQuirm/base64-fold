@@ -15,5 +15,7 @@
 	[
 		"css","less","sass","scss",
 		"htm","html"
-	]
+	],
+
+	"base64fold_all_uris": true
 }
