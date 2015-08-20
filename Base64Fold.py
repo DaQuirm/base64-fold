@@ -11,7 +11,7 @@ class FoldBase64Command(sublime_plugin.TextCommand):
 
     if fold_all_uris:
       # fold all URIs if the option is enabled
-      regexp = '\(([\'"])?[^,]+,(.+?)(?=\1?\))'
+      regexp = 'url\(([\'"])?[^,]+,(.+?)(?=\1?\))'
       match_index = 2 # second group
       region_filter = lambda region: region
     else:
