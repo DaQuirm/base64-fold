@@ -13,9 +13,42 @@ li {
 	list-style-image: url('data:image/svg+xml;utf8,<svg width="11px" height="11px" xmlns="http://www.w3.org/2000/svg"><path d="M6.56713392,6.3167819 ... Z" fill="red" stroke="black" stroke-width="1"></path></svg>');
 }
 
+/* multiline svg in utf8 */
+li {
+    list-style-image: url('data:image/svg+xml;utf8,<svg width="11px" height="11px" xmlns="http://www.w3.org/2000/svg"><path d="M6.56713392,6.3167819 ... Z"\
+     fill="red" stroke="black" stroke-width="1"></path></svg>');
+}
+
 /* should not be folded, false positive if it is */
 li {
 	list-style-image: rgba(0, 0, 0, .5);
 }
 
+/* multiline base64 with whitespace */
+span {
+    padding-left: 20px;
+    background:white url('data:image/png;base64,iVBORw0KGgoAA\
+        AANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAA   BlBMVEUAAAD///+l2Z/dAAAAM0l\
+        EQVR4nGP4/5/h/1+G/58ZDrAz3D/McH8yw83NDDeNGe4Ug9C9zwz3gVLMDA/A6\
+        P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC') no-repeat scroll left top;
+}
+/* Backslashes at end of line - to continue character string
+     at new line. */
 
+/* multiline base64 with whitespace, incorrect size */
+span {
+    padding-left: 20px;
+    background:white url('data:image/png;base64,iVBORw0KGgoAA\
+        AANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAA   BlBMVEUAAAD///+l2Z/dAAAAM0l\
+        EQVR4nGP4/5/h/1+G/58ZDrAz3D/McH8yw83NDDeNGe4Ug9C9zwz3gVLMDA/A6\
+        P9/AFGGFyjOXZtQAAAAAElFTkSuQmCCk') no-repeat scroll left top;
+}
+
+/* multiline base64 with whitespace and no indentation */
+span {
+    padding-left: 20px;
+    background:white url('data:image/png;base64,iVBORw0KGgoAA\
+AANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAA   BlBMVEUAAAD///+l2Z/dAAAAM0l\
+EQVR4nGP4/5/h/1+G/58ZDrAz3D/McH8yw83NDDeNGe4Ug9C9zwz3gVLMDA/A6\
+P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC') no-repeat scroll left top;
+}

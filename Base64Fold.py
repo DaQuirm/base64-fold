@@ -11,19 +11,21 @@ class FoldBase64Command(sublime_plugin.TextCommand):
 
     if fold_all_uris:
       # fold all URIs if the option is enabled
-      regexp = 'url\(([\'"])?[^,]+,(.+?)(?=\1?\))'
+      regexp = r'url\(([\'"])?[^,]+,([^\n\\]+?(?:\\\n[^\n\\]*?)*?)(?=\1?\))'
       match_index = 2 # second group
       region_filter = lambda region: region
     else:
       # fold just the base64 URIs otherwise
 
+      whitespace = r'(?:\\?\n|[\t ])+'
+      base64 = r'[\w\d+/]{2,}'
       # Base64 decodes each 4 encoded characters into 3 octects. The padding '='
       # character might appear 1 or 2 times only at the end of the Base64 code,
       # and only if there are fewer than 3 octects to be decoded. We don't need to
       # match what (["');], etc) is after the code, as they are not being folded.
-      regexp = '(?<=base64\,)[\w\d\+\/]{2,}={0,2}'
-      # Only fold Base64 code that has a valid length
-      region_filter = lambda region: region.size() % 4 == 0
+      regexp = r'(?<=base64,)' + base64 + r'(?:' + whitespace + base64 + r')*={0,2}'
+      # Only fold Base64 code that has a valid length - ignoring whitespace
+      region_filter = lambda region: len(re.sub(whitespace, '', self.view.substr(region))) % 4 == 0
 
     view_text = self.view.substr(sublime.Region(0, self.view.size()))
 
