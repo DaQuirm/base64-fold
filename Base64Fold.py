@@ -4,36 +4,42 @@ import sublime, sublime_plugin
 class FoldBase64Command(sublime_plugin.TextCommand):
   def run(self, edit, fold_all_uris):
 
-    # regular expression to search with
-    regexp = None
-    match_index = 0
-    region_filter = None
-
+    whitespace = r'(?:\\?\n|[\t ])+'
+    # Only fold Base64 code that has a valid length - ignoring whitespace
+    base64_filter = lambda region: len(re.sub(whitespace, '', self.view.substr(region))) % 4 == 0
     if fold_all_uris:
       # fold all URIs if the option is enabled
-      regexp = 'url\(([\'"])?[^,]+,(.+?)(?=\1?\))'
-      match_index = 2 # second group
-      region_filter = lambda region: region
-    else:
-      # fold just the base64 URIs otherwise
+      regexp = r'url\(([\'"])?[^;]+;([^,]+),([^\n\\]+?(?:\\\n[^\n\\]*?)*?)(?=\1?\))'
+      match_index = 3 # third group
+      base64_index = 2 # second group
+      self.fold_by_pattern(regexp, base64_index, match_index, base64_filter)
 
-      # Base64 decodes each 4 encoded characters into 3 octects. The padding '='
-      # character might appear 1 or 2 times only at the end of the Base64 code,
-      # and only if there are fewer than 3 octects to be decoded. We don't need to
-      # match what (["');], etc) is after the code, as they are not being folded.
-      regexp = '(?<=base64\,)[\w\d\+\/]{2,}={0,2}'
-      # Only fold Base64 code that has a valid length
-      region_filter = lambda region: region.size() % 4 == 0
+    # fold the base64 URIs
+    base64 = r'[\w\d+/]{2,}'
+    # Base64 decodes each 4 encoded characters into 3 octects. The padding '='
+    # character might appear 1 or 2 times only at the end of the Base64 code,
+    # and only if there are fewer than 3 octects to be decoded. We don't need to
+    # match what (["');], etc) is after the code, as they are not being folded.
+    regexp = r'(base64),(' + base64 + r'(?:' + whitespace + base64 + r')*={0,2})'
+    match_index = 2 # second group
+    base64_index = 1 # first group
 
+    self.fold_by_pattern(regexp, base64_index, match_index, base64_filter)
+
+  def fold_by_pattern(self, regexp, base64_index, match_index, base64_region_filter):
     view_text = self.view.substr(sublime.Region(0, self.view.size()))
+
+    def get_region_from_group(match, group_index):
+      start = match.start(group_index)
+      end = start + len(match.group(group_index))
+      return sublime.Region(start, end)
 
     pattern = re.compile(regexp)
     for match in pattern.finditer(view_text):
-      start = match.start(match_index)
-      end = start + len(match.group(match_index))
-      region = sublime.Region(start, end)
-      if region_filter(region):
-        self.view.fold(region)
+      is_base64 = self.view.substr(get_region_from_group(match, base64_index)) == 'base64'
+      fold_region = get_region_from_group(match, match_index)
+      if not is_base64 or base64_region_filter(fold_region):
+        self.view.fold(fold_region)
 
 class Base64Fold(sublime_plugin.EventListener):
   def init_(self):
